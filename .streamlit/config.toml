@@ -1,0 +1,9 @@
+[theme]
+base="dark"
+primaryColor = "#E694FF"
+backgroundColor = "#00172B"
+secondaryBackgroundColor = "purple"
+textColor = "#FFFFFF"
+
+[server]
+runOnSave = true
