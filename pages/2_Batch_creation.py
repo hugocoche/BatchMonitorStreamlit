@@ -199,6 +199,7 @@ else:
         uploaded_file = st.file_uploader("Upload a file", type=["json"])
         if uploaded_file is not None:
             json_df = pd.read_json(uploaded_file)
+            st.write(json_df)
             df = create_df_from_json(json_df)
 
     if uploaded_file is not None:
