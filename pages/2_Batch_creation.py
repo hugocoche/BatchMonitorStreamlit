@@ -199,8 +199,8 @@ else:
         uploaded_file = st.file_uploader("Upload a file", type=["json"])
         if uploaded_file is not None:
             json_df = pd.read_json(uploaded_file)
-            st.table(json_df)
             df = create_df_from_json(json_df)
+            st.table(df)
     st.table(df)
     if uploaded_file is not None:
         for Numbers in df.iloc[:-2].values.tolist():
