@@ -201,14 +201,14 @@ if st.sidebar.button("Export demand"):
             "object is not an instance of ItemListRequest or object is empty, export failed"
         )
 
-if st.session_state["Demand"] is not None and isinstance(
-    st.session_state["Demand"], ItemListRequest
+if st.session_state["Demand_list"] is not None and isinstance(
+    st.session_state["Demand_list"], ItemListRequest
 ):
-    st.session_state["export_demand"] = st.session_state["Demand"]
-    json_export_demand = json.dumps(
-        obj=st.session_state["export_demand"], default=lambda o: o.__dict, indent=4
+    st.session_state["export_demand_list"] = st.session_state["Demand_list"]
+    json_export_demand_list = json.dumps(
+        obj=st.session_state["export_demand_list"], default=lambda o: o.__dict, indent=4
     )
     if st.sidebar.download_button(
-        "Download demand", json_export_demand, "demand.json", "json"
+        "Download demand_list", json_export_demand_list, "demand_list.json", "json"
     ):
         pass
