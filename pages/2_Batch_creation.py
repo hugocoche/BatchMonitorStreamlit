@@ -163,6 +163,8 @@ else:
     if "batch_collection" not in st.session_state:
         st.session_state["batch_collection"] = None
 
+    b1, _ = st.columns([1, 1])
+
     if (
         st.selectbox(
             "Select the type of the file you want to upload",
@@ -184,8 +186,6 @@ else:
         )
 
         uploaded_file = st.file_uploader("Upload a file", type=["csv", "xlsx"])
-
-        b1, b2, b3, _ = st.columns([1, 1, 1, 1])
 
         if uploaded_file is not None:
             _, file_extension = os.path.splitext(uploaded_file.name)
