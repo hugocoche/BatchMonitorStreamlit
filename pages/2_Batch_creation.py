@@ -344,7 +344,7 @@ if st.session_state["batch_collection"] is not None and isinstance(
 ):
     st.session_state["export_batch_collection"] = st.session_state["batch_collection"]
     json_export_batch_collection = json.dumps(
-        obj=st.session_state["export_batch_collection"],
+        obj=st.session_state["export_batch_collection"].batchlists,
         default=lambda o: o.__dict__,
         indent=4,
     )
