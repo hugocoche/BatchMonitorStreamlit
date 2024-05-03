@@ -19,3 +19,6 @@ st.write(
 st.write(
     "3. The third page allows you to visualize the batches of items you created and the solutions of the different linear programming problems.(warning: sometimes you will just need to reload the batch list and the demand to see the results)"
 )
+st.write(
+    "Our application use pickle to save the data, so you can close the application and open it again, the data will still be there."
+)
