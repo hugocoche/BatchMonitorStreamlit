@@ -5,7 +5,7 @@ import altair as alt
 import pickle
 import copy
 import os
-from BatchMonitor import (
+from BatchMonitor import (  # type: ignore
     BatchLists,
     BatchCollection,
     minBatchExpense,
@@ -73,7 +73,7 @@ if "Batches" in st.session_state and st.session_state["Batches"] is not None:
 
 
 @st.cache_data(experimental_allow_widgets=True, show_spinner=False)
-def basic_graph(data: pd.DataFrame) -> alt.Chart:
+def basic_graph(data: pd.DataFrame):
     st.markdown("#### Visualisation of the batches")
 
     options = list(st.session_state["database"].index[:-1])
@@ -296,14 +296,15 @@ if (
                         batch_name not in st.session_state["batch_constraints"].keys()
                         and batch_name is not None
                     ):
-                        if min_quantity > max_quantity:
-                            st.write(
-                                "Minimum quantity must be less than maximum quantity"
+                        if min_quantity is not None and max_quantity is not None:
+                            if min_quantity > max_quantity:
+                                st.write(
+                                    "Minimum quantity must be less than maximum quantity"
+                                )
+                            st.session_state["batch_constraints"][batch_name] = (
+                                min_quantity,
+                                max_quantity,
                             )
-                        st.session_state["batch_constraints"][batch_name] = (
-                            min_quantity,
-                            max_quantity,
-                        )
                     else:
                         st.write("Batch constraint already created !")
                     info_1 = pd.DataFrame(
@@ -328,12 +329,15 @@ if (
                         object_name not in st.session_state["price_constraints"].keys()
                         and object_name is not None
                     ):
-                        if min_value > max_value:
-                            st.write("Minimum value must be less than maximum value")
-                        st.session_state["price_constraints"][object_name] = (
-                            min_value,
-                            max_value,
-                        )
+                        if min_value is not None and max_value is not None:
+                            if min_value > max_value:
+                                st.write(
+                                    "Minimum value must be less than maximum value"
+                                )
+                            st.session_state["price_constraints"][object_name] = (
+                                min_value,
+                                max_value,
+                            )
                     else:
                         st.write("Price constraint already created !")
                     info_2 = pd.DataFrame(
@@ -493,7 +497,7 @@ def graph_optimization_batches(
     maximum_benefit=None,
     batch_constraints=None,
     price_constraints=None,
-) -> alt.Chart:
+):
     if Batches is not None and demand_list is not None and price is not None:
 
         for i in range(len(Batches.batch_list)):
@@ -584,7 +588,7 @@ def batches_quantity_price_variation(
     minimum_expense=None,
     maximum_expense=None,
     batch_constraints=None,
-) -> alt.Chart:
+):
     if Batches is not None and demand_list is not None and Step is not None:
         batches = copy.deepcopy(Batches)
         list_dict: dict[str, list]
@@ -706,7 +710,7 @@ def item_quantity_batch_price_variation(
     minimum_benefit=None,
     maximum_benefit=None,
     price_constraints=None,
-) -> alt.Chart:
+):
     if (
         Batches is not None
         and demand_list is not None
@@ -829,24 +833,27 @@ if (
     and st.session_state["category_of_variables"] is not None
 ):
     st.markdown("#### Visualization of the Problem's Resolution")
-    graph_optimization_batches(
-        st.session_state["Batches_used"],
-        st.session_state["Demand"],
-        st.session_state["price"],
-        og_price,
-        method,
-        st.session_state["category_of_variables"],
-        st.session_state["exchange_rate"],
-        st.session_state["tax_rate"],
-        st.session_state["custom_duty"],
-        st.session_state["transport_fee"],
-        st.session_state["Minimum_Expense"],
-        st.session_state["Maximum_Expense"],
-        st.session_state["Minimum_Benefit"],
-        st.session_state["Maximum_Benefit"],
-        st.session_state["batch_constraints"],
-        st.session_state["price_constraints"],
-    )
+    try:
+        graph_optimization_batches(
+            st.session_state["Batches_used"],
+            st.session_state["Demand"],
+            st.session_state["price"],
+            og_price,
+            method,
+            st.session_state["category_of_variables"],
+            st.session_state["exchange_rate"],
+            st.session_state["tax_rate"],
+            st.session_state["custom_duty"],
+            st.session_state["transport_fee"],
+            st.session_state["Minimum_Expense"],
+            st.session_state["Maximum_Expense"],
+            st.session_state["Minimum_Benefit"],
+            st.session_state["Maximum_Benefit"],
+            st.session_state["batch_constraints"],
+            st.session_state["price_constraints"],
+        )
+    except Exception as e:
+        st.error(f"{str(e)}")
 
     if method == "Primal":
         st.markdown(
@@ -855,22 +862,26 @@ if (
         st.write(
             "You need to modify the minimum, maximum and step values to see the variation of the quantity of the batch"
         )
-        batches_quantity_price_variation(
-            st.session_state["Batches_used"],
-            st.session_state["Demand"],
-            og_price,
-            st.session_state["Mini"],
-            st.session_state["Maxi"],
-            st.session_state["step"],
-            st.session_state["category_of_variables"],
-            st.session_state["exchange_rate"],
-            st.session_state["tax_rate"],
-            st.session_state["custom_duty"],
-            st.session_state["transport_fee"],
-            st.session_state["Minimum_Expense"],
-            st.session_state["Maximum_Expense"],
-            st.session_state["batch_constraints"],
-        )
+        try:
+            batches_quantity_price_variation(
+                st.session_state["Batches_used"],
+                st.session_state["Demand"],
+                og_price,
+                st.session_state["Mini"],
+                st.session_state["Maxi"],
+                st.session_state["step"],
+                st.session_state["category_of_variables"],
+                st.session_state["exchange_rate"],
+                st.session_state["tax_rate"],
+                st.session_state["custom_duty"],
+                st.session_state["transport_fee"],
+                st.session_state["Minimum_Expense"],
+                st.session_state["Maximum_Expense"],
+                st.session_state["batch_constraints"],
+            )
+        except Exception as e:
+            st.error(f"{str(e)}")
+
     elif method == "Dual":
         st.markdown(
             "#### Study of the Effect of a Price Variation for One Batch on the Prices of Items"
@@ -878,19 +889,22 @@ if (
         st.write(
             "You need to modify the minimum, maximum and step values to see the variation of the price of the item"
         )
-        item_quantity_batch_price_variation(
-            st.session_state["Batches_used"],
-            st.session_state["Demand"],
-            og_price,
-            st.session_state["Mini"],
-            st.session_state["Maxi"],
-            st.session_state["step"],
-            st.session_state["category_of_variables"],
-            st.session_state["exchange_rate"],
-            st.session_state["tax_rate"],
-            st.session_state["custom_duty"],
-            st.session_state["transport_fee"],
-            st.session_state["Minimum_Benefit"],
-            st.session_state["Maximum_Benefit"],
-            st.session_state["price_constraints"],
-        )
+        try:
+            item_quantity_batch_price_variation(
+                st.session_state["Batches_used"],
+                st.session_state["Demand"],
+                og_price,
+                st.session_state["Mini"],
+                st.session_state["Maxi"],
+                st.session_state["step"],
+                st.session_state["category_of_variables"],
+                st.session_state["exchange_rate"],
+                st.session_state["tax_rate"],
+                st.session_state["custom_duty"],
+                st.session_state["transport_fee"],
+                st.session_state["Minimum_Benefit"],
+                st.session_state["Maximum_Benefit"],
+                st.session_state["price_constraints"],
+            )
+        except Exception as e:
+            st.error(f"{str(e)}")
