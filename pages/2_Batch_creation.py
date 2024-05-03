@@ -168,7 +168,7 @@ else:
     if (
         st.selectbox(
             "Select the type of the file you want to upload",
-            ["csv/xlsx", "json"],
+            ["csv/xlsx", "JSON"],
         )
         == "csv/xlsx"
     ):
