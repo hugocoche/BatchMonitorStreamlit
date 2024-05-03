@@ -169,55 +169,52 @@ else:
                 item_lists = pd.read_json(uploaded_file)
                 df = pd.DataFrame(
                     item_lists,
-                    columns=["Item name", "Item Quantity min", "Item Quantity max"],
+                    columns=["Item Quantity min", "Item Quantity max"],
                 )
-                df["Item name"] = [
-                    item_list["name"] for item_list in item_lists["items"]
-                ]
+                df.index = [item_list["name"] for item_list in item_lists["items"]]
                 df["Item Quantity min"] = [
                     item_list["minimum_quantity"] for item_list in item_lists["items"]
                 ]
                 df["Item Quantity max"] = [
                     item_list["maximum_quantity"] for item_list in item_lists["items"]
                 ]
-                st.session_state["Demand_list"] = df
-            else:
-                st.write("Please upload a file")
-            for row in df.itertuples():
-                Item_Name, Item_Quantity_min, Item_Quantity_max = (
-                    row
-                    if len(row) == 3
-                    else [
-                        row[0],
-                        row[1],
-                        round(float("{:.2e}".format(1.797e308)), 2),
-                    ]
-                )
-                if Item_Name not in st.session_state["deja_vu"]:
-                    if "Demand_list" not in st.session_state or not isinstance(
-                        st.session_state["Demand_list"], ItemListRequest
-                    ):
-                        st.session_state["Demand_list"] = ItemListRequest(
-                            [
+                for row in df.itertuples():
+                    Item_Name, Item_Quantity_min, Item_Quantity_max = (
+                        row
+                        if len(row) == 3
+                        else [
+                            row[0],
+                            row[1],
+                            round(float("{:.2e}".format(1.797e308)), 2),
+                        ]
+                    )
+                    if Item_Name not in st.session_state["deja_vu"]:
+                        if "Demand_list" not in st.session_state or not isinstance(
+                            st.session_state["Demand_list"], ItemListRequest
+                        ):
+                            st.session_state["Demand_list"] = ItemListRequest(
+                                [
+                                    ItemRequest(
+                                        Item_Name,
+                                        Item_Quantity_min,
+                                        Item_Quantity_max,
+                                    )
+                                ]
+                            )
+                            st.session_state["deja_vu"].append(Item_Name)
+                        else:
+                            st.session_state["Demand_list"].items.append(
                                 ItemRequest(
                                     Item_Name,
                                     Item_Quantity_min,
                                     Item_Quantity_max,
                                 )
-                            ]
-                        )
-                        st.session_state["deja_vu"].append(Item_Name)
-                    else:
-                        st.session_state["Demand_list"].items.append(
-                            ItemRequest(
-                                Item_Name,
-                                Item_Quantity_min,
-                                Item_Quantity_max,
                             )
-                        )
-                        st.session_state["deja_vu"].append(Item_Name)
-                else:
-                    st.write("Item already in the list")
+                            st.session_state["deja_vu"].append(Item_Name)
+                    else:
+                        st.write("Item already in the list")
+            else:
+                st.write("Please upload a file")
 
 if st.session_state["Demand_list"] is not None and "Demand_list" in st.session_state:
     for item in st.session_state["Demand_list"].items:
