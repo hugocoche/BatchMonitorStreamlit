@@ -128,18 +128,19 @@ else:
     else:
 
         uploaded_file = st.file_uploader("Upload a file", type=["json"])
-        item_lists = pd.read_json(uploaded_file)
-        df = pd.DataFrame(
-            item_lists,
-            columns=["Item Quantity min", "Item Quantity max"],
-        )
-        df.index = [item_list["name"] for item_list in item_lists["items"]]
-        df["Item Quantity min"] = [
-            item_list["minimum_quantity"] for item_list in item_lists["items"]
-        ]
-        df["Item Quantity max"] = [
-            item_list["maximum_quantity"] for item_list in item_lists["items"]
-        ]
+        if uploaded_file is not None:
+            item_lists = pd.read_json(uploaded_file)
+            df = pd.DataFrame(
+                item_lists,
+                columns=["Item Quantity min", "Item Quantity max"],
+            )
+            df.index = [item_list["name"] for item_list in item_lists["items"]]
+            df["Item Quantity min"] = [
+                item_list["minimum_quantity"] for item_list in item_lists["items"]
+            ]
+            df["Item Quantity max"] = [
+                item_list["maximum_quantity"] for item_list in item_lists["items"]
+            ]
 
     if uploaded_file is not None:
         if b1.button("construct demand"):
