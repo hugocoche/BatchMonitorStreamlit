@@ -208,6 +208,6 @@ if st.session_state["Demand_list"] is not None and isinstance(
         indent=4,
     )
     if st.sidebar.download_button(
-        "Download demand_list", json_export_demand_list, "demand_list.json", "json"
+        "Download demand list", json_export_demand_list, "demand_list.json", "json"
     ):
         pass
