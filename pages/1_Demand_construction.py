@@ -170,7 +170,7 @@ else:
                 # st.session_state["Demand"] = ItemListRequest.from_json(
                 #     f"{uploaded_file.name}"
                 # )
-                df = pd.DataFrame(pd.read_json(uploaded_file, index_col=0))
+                df = pd.DataFrame(pd.read_json(uploaded_file))
                 st.table(df)
             else:
                 st.write("Please upload a file")
