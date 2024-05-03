@@ -184,18 +184,23 @@ else:
             else:
                 st.write("Please upload a file")
 
-st.table(st.session_state["Demand_list"])
-if st.session_state["Demand_list"] is not None and "Demand_list" in st.session_state:
-    for item in st.session_state["Demand_list"].items:
-        demand_info = pd.DataFrame(
-            {
-                "Item Name": [item.name],
-                "Item Quantity min": [item.minimum_quantity],
-                "Item Quantity max": [item.maximum_quantity],
-            }
-        )
-        demand_info = demand_info.set_index("Item Name")
-        st.table(demand_info)
+if not isinstance(st.session_state["Demand_list"], pd.DataFrame):
+    if (
+        st.session_state["Demand_list"] is not None
+        and "Demand_list" in st.session_state
+    ):
+        for item in st.session_state["Demand_list"].items:
+            demand_info = pd.DataFrame(
+                {
+                    "Item Name": [item.name],
+                    "Item Quantity min": [item.minimum_quantity],
+                    "Item Quantity max": [item.maximum_quantity],
+                }
+            )
+            demand_info = demand_info.set_index("Item Name")
+            st.table(demand_info)
+else:
+    st.table(st.session_state["Demand_list"])
 
 if st.sidebar.button("Clear demand"):
     st.session_state["deja_vu"] = []
