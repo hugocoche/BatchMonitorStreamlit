@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import os
 from BatchMonitor import ItemListRequest, ItemRequest  # type: ignore
-import pickle
 import json
 
 if (
@@ -39,7 +38,7 @@ if (
         st.session_state["deja_vu"] = []
 
     if "Demand" not in st.session_state:
-        st.session_state["Demand"] = None
+        st.session_state["Demand_list"] = None
 
     c1, c2, _ = st.columns([1, 1, 1])
 
@@ -51,9 +50,9 @@ if (
         ):
             if Item_requested not in st.session_state["deja_vu"]:
                 if "Demand" not in st.session_state or not isinstance(
-                    st.session_state["Demand"], ItemListRequest
+                    st.session_state["Demand_list"], ItemListRequest
                 ):
-                    st.session_state["Demand"] = ItemListRequest(
+                    st.session_state["Demand_list"] = ItemListRequest(
                         [
                             ItemRequest(
                                 Item_requested,
@@ -64,7 +63,7 @@ if (
                     )
                     st.session_state["deja_vu"].append(Item_requested)
                 else:
-                    st.session_state["Demand"].items.append(
+                    st.session_state["Demand_list"].items.append(
                         ItemRequest(
                             Item_requested,
                             Item_requested_quantity_min,
@@ -78,14 +77,14 @@ if (
             st.write("Please fill all the fields")
 
     if c2.button("remove previous item"):
-        if st.session_state["Demand"] is not None and isinstance(
-            st.session_state["Demand"], ItemListRequest
+        if st.session_state["Demand_list"] is not None and isinstance(
+            st.session_state["Demand_list"], ItemListRequest
         ):
-            if len(st.session_state["Demand"]) == 0:
-                del st.session_state["Demand"]
+            if len(st.session_state["Demand_list"]) == 0:
+                del st.session_state["Demand_list"]
                 st.write("No item to remove")
             else:
-                st.session_state["Demand"].items.pop()
+                st.session_state["Demand_list"].items.pop()
                 st.session_state["deja_vu"].pop()
         st.rerun()
 
@@ -95,7 +94,7 @@ else:
         st.session_state["deja_vu"] = []
 
     if "Demand" not in st.session_state:
-        st.session_state["Demand"] = None
+        st.session_state["Demand_list"] = None
 
     if (
         st.selectbox(
@@ -139,9 +138,9 @@ else:
                     )
                     if Item_Name not in st.session_state["deja_vu"]:
                         if "Demand" not in st.session_state or not isinstance(
-                            st.session_state["Demand"], ItemListRequest
+                            st.session_state["Demand_list"], ItemListRequest
                         ):
-                            st.session_state["Demand"] = ItemListRequest(
+                            st.session_state["Demand_list"] = ItemListRequest(
                                 [
                                     ItemRequest(
                                         Item_Name,
@@ -152,7 +151,7 @@ else:
                             )
                             st.session_state["deja_vu"].append(Item_Name)
                         else:
-                            st.session_state["Demand"].items.append(
+                            st.session_state["Demand_list"].items.append(
                                 ItemRequest(
                                     Item_Name,
                                     Item_Quantity_min,
@@ -167,13 +166,13 @@ else:
         uploaded_file = st.file_uploader("Upload a file", type=["json"])
 
         if uploaded_file is not None:
-            st.session_state["Demand"] = ItemListRequest.from_json(
+            st.session_state["Demand_list"] = ItemListRequest.from_json(
                 f"{uploaded_file.name}"
             )
 
 
-if st.session_state["Demand"] is not None and "Demand" in st.session_state:
-    for item in st.session_state["Demand"].items:
+if st.session_state["Demand_list"] is not None and "Demand" in st.session_state:
+    for item in st.session_state["Demand_list"].items:
         demand_info = pd.DataFrame(
             {
                 "Item Name": [item.name],
@@ -186,20 +185,9 @@ if st.session_state["Demand"] is not None and "Demand" in st.session_state:
 
 if st.sidebar.button("Clear demand"):
     st.session_state["deja_vu"] = []
-    del st.session_state["Demand"]
+    del st.session_state["Demand_list"]
     st.rerun()
 
-if st.sidebar.button("Export demand"):
-    if len(st.session_state["Demand"]) > 0 and isinstance(
-        st.session_state["Demand"], ItemListRequest
-    ):
-        with open("demand.pkl", "wb") as d:
-            pickle.dump(st.session_state["Demand"], d)
-        st.write("Demand exported ;) !")
-    else:
-        st.write(
-            "object is not an instance of ItemListRequest or object is empty, export failed"
-        )
 
 if st.session_state["Demand_list"] is not None and isinstance(
     st.session_state["Demand_list"], ItemListRequest
