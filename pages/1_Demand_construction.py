@@ -37,7 +37,7 @@ if (
     if "deja_vu" not in st.session_state:
         st.session_state["deja_vu"] = []
 
-    if "Demand" not in st.session_state:
+    if "Demand_list" not in st.session_state:
         st.session_state["Demand_list"] = None
 
     c1, c2, _ = st.columns([1, 1, 1])
@@ -49,7 +49,7 @@ if (
             and Item_requested_quantity_max is not None
         ):
             if Item_requested not in st.session_state["deja_vu"]:
-                if "Demand" not in st.session_state or not isinstance(
+                if "Demand_list" not in st.session_state or not isinstance(
                     st.session_state["Demand_list"], ItemListRequest
                 ):
                     st.session_state["Demand_list"] = ItemListRequest(
@@ -93,7 +93,7 @@ else:
     if "deja_vu" not in st.session_state:
         st.session_state["deja_vu"] = []
 
-    if "Demand" not in st.session_state:
+    if "Demand_list" not in st.session_state:
         st.session_state["Demand_list"] = None
 
     if (
@@ -137,7 +137,7 @@ else:
                         ]
                     )
                     if Item_Name not in st.session_state["deja_vu"]:
-                        if "Demand" not in st.session_state or not isinstance(
+                        if "Demand_list" not in st.session_state or not isinstance(
                             st.session_state["Demand_list"], ItemListRequest
                         ):
                             st.session_state["Demand_list"] = ItemListRequest(
@@ -171,7 +171,7 @@ else:
             )
 
 
-if st.session_state["Demand_list"] is not None and "Demand" in st.session_state:
+if st.session_state["Demand_list"] is not None and "Demand_list" in st.session_state:
     for item in st.session_state["Demand_list"].items:
         demand_info = pd.DataFrame(
             {
