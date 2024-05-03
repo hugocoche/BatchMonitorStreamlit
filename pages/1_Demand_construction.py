@@ -171,7 +171,9 @@ else:
                     item_lists,
                     columns=["Item name", "Item Quantity min", "Item Quantity max"],
                 )
-                df.index = [item_list["name"] for item_list in item_lists["items"]]
+                df["Item name"] = [
+                    item_list["name"] for item_list in item_lists["items"]
+                ]
                 df["Item Quantity min"] = [
                     item_list["minimum_quantity"] for item_list in item_lists["items"]
                 ]
