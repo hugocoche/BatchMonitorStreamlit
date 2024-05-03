@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from BatchMonitor import BatchLists, BatchCollection, Batch, Item_in_batch  # type: ignore
+from BatchMonitor import BatchLists, BatchCollection, Batch, Item_in_batch, create_df_from_json  # type: ignore
 import json
 import os
 
@@ -152,15 +152,6 @@ if (
                 st.write("No item to remove")
             st.rerun()
 
-    for batch in st.session_state["all_batches"]:
-        st.markdown(
-            f"#### {batch['Seller']} - {batch['Batch Name']} - Value : {batch['Batch Value']} dollars"
-        )
-        if "Items" in batch:
-            batch_info = pd.DataFrame(batch["Items"])
-            batch_info = batch_info.set_index("Item Name")
-            st.table(batch_info)
-
 else:
 
     if "already_seen" not in st.session_state:
@@ -203,57 +194,42 @@ else:
             elif file_extension == ".xlsx":
                 df = pd.DataFrame(pd.read_excel(uploaded_file, index_col=0))
 
-            for Numbers in df.iloc[:-2].values.tolist():
-                if not all(isinstance(x, (int, float)) for x in Numbers):
-                    st.write("Please make sure all values are numbers")
-                    break
-            else:
-                if b1.button("Create batches"):
-                    for Batch_Name, Batch_Value, Seller_name in zip(
-                        df.columns.tolist(),
-                        df.iloc[-2].tolist(),
-                        df.iloc[-1].tolist(),
+    else:
+
+        uploaded_file = st.file_uploader("Upload a file", type=["json"])
+        if uploaded_file is not None:
+            json_df = pd.read_json(uploaded_file)
+            df = create_df_from_json(json_df)
+
+    if uploaded_file is not None:
+        for Numbers in df.iloc[:-2].values.tolist():
+            if not all(isinstance(x, (int, float)) for x in Numbers):
+                st.write("Please make sure all values are numbers")
+                break
+        else:
+            if b1.button("Create batches"):
+                for Batch_Name, Batch_Value, Seller_name in zip(
+                    df.columns.tolist(),
+                    df.iloc[-2].tolist(),
+                    df.iloc[-1].tolist(),
+                ):
+                    for Item_Name, Item_Value in zip(
+                        df.index[:-2].tolist(),
+                        df[Batch_Name].iloc[:-2].tolist(),
                     ):
-                        for Item_Name, Item_Value in zip(
-                            df.index[:-2].tolist(),
-                            df[Batch_Name].iloc[:-2].tolist(),
-                        ):
-                            if (Seller_name, Batch_Name) not in st.session_state[
-                                "already_seen"
-                            ]:
-                                if (
-                                    "batch_collection" not in st.session_state
-                                    or not isinstance(
-                                        st.session_state["batch_collection"], BatchLists
-                                    )
-                                ):
-                                    st.session_state["batch_collection"] = BatchLists(
-                                        batchlists=[
-                                            BatchCollection(
-                                                batch_list=[
-                                                    Batch(
-                                                        Batch_Name,
-                                                        Batch_Value,
-                                                        [
-                                                            Item_in_batch(
-                                                                Item_Name, Item_Value
-                                                            )
-                                                        ],
-                                                    )
-                                                ],
-                                                seller=Seller_name,
-                                            )
-                                        ]
-                                    )
-                                    st.session_state["already_seen"].append(
-                                        (Seller_name, Batch_Name)
-                                    )
-                                else:
-                                    for batchcollection in st.session_state[
-                                        "batch_collection"
-                                    ].batchlists:
-                                        if batchcollection.seller == Seller_name:
-                                            batchcollection.batch_list.append(
+                        if (Seller_name, Batch_Name) not in st.session_state[
+                            "already_seen"
+                        ]:
+                            if (
+                                "batch_collection" not in st.session_state
+                                or not isinstance(
+                                    st.session_state["batch_collection"], BatchLists
+                                )
+                            ):
+                                st.session_state["batch_collection"] = BatchLists(
+                                    batchlists=[
+                                        BatchCollection(
+                                            batch_list=[
                                                 Batch(
                                                     Batch_Name,
                                                     Batch_Value,
@@ -263,87 +239,97 @@ else:
                                                         )
                                                     ],
                                                 )
-                                            )
-                                            break
-                                    else:
-                                        st.session_state[
-                                            "batch_collection"
-                                        ].batchlists.append(
-                                            BatchCollection(
-                                                batch_list=[
-                                                    Batch(
-                                                        Batch_Name,
-                                                        Batch_Value,
-                                                        [
-                                                            Item_in_batch(
-                                                                Item_Name, Item_Value
-                                                            )
-                                                        ],
-                                                    )
-                                                ],
-                                                seller=Seller_name,
-                                            )
+                                            ],
+                                            seller=Seller_name,
                                         )
+                                    ]
+                                )
                                 st.session_state["already_seen"].append(
                                     (Seller_name, Batch_Name)
-                                )
-                                st.session_state["all_batches"].append(
-                                    {
-                                        "Seller": Seller_name,
-                                        "Batch Name": Batch_Name,
-                                        "Batch Value": Batch_Value,
-                                        "Items": [
-                                            {
-                                                "Item Name": Item_Name,
-                                                "Item Value": Item_Value,
-                                            }
-                                        ],
-                                    }
                                 )
                             else:
                                 for batchcollection in st.session_state[
                                     "batch_collection"
                                 ].batchlists:
                                     if batchcollection.seller == Seller_name:
-                                        for batch in batchcollection.batch_list:
-                                            if (
-                                                batch.name == Batch_Name
-                                                and batch.price == Batch_Value
-                                            ):
-                                                batch.items.append(
-                                                    Item_in_batch(Item_Name, Item_Value)
-                                                )
-                                for sous_liste in st.session_state["all_batches"]:
-                                    if (
-                                        sous_liste["Batch Name"] == Batch_Name
-                                        and sous_liste["Batch Value"] == Batch_Value
-                                    ):
-                                        if isinstance(sous_liste["Items"], list):
-                                            sous_liste["Items"].append(
-                                                {
-                                                    "Item Name": Item_Name,
-                                                    "Item Value": Item_Value,
-                                                }
+                                        batchcollection.batch_list.append(
+                                            Batch(
+                                                Batch_Name,
+                                                Batch_Value,
+                                                [Item_in_batch(Item_Name, Item_Value)],
                                             )
-                    st.rerun()
+                                        )
+                                        break
+                                else:
+                                    st.session_state[
+                                        "batch_collection"
+                                    ].batchlists.append(
+                                        BatchCollection(
+                                            batch_list=[
+                                                Batch(
+                                                    Batch_Name,
+                                                    Batch_Value,
+                                                    [
+                                                        Item_in_batch(
+                                                            Item_Name, Item_Value
+                                                        )
+                                                    ],
+                                                )
+                                            ],
+                                            seller=Seller_name,
+                                        )
+                                    )
+                            st.session_state["already_seen"].append(
+                                (Seller_name, Batch_Name)
+                            )
+                            st.session_state["all_batches"].append(
+                                {
+                                    "Seller": Seller_name,
+                                    "Batch Name": Batch_Name,
+                                    "Batch Value": Batch_Value,
+                                    "Items": [
+                                        {
+                                            "Item Name": Item_Name,
+                                            "Item Value": Item_Value,
+                                        }
+                                    ],
+                                }
+                            )
+                        else:
+                            for batchcollection in st.session_state[
+                                "batch_collection"
+                            ].batchlists:
+                                if batchcollection.seller == Seller_name:
+                                    for batch in batchcollection.batch_list:
+                                        if (
+                                            batch.name == Batch_Name
+                                            and batch.price == Batch_Value
+                                        ):
+                                            batch.items.append(
+                                                Item_in_batch(Item_Name, Item_Value)
+                                            )
+                            for sous_liste in st.session_state["all_batches"]:
+                                if (
+                                    sous_liste["Batch Name"] == Batch_Name
+                                    and sous_liste["Batch Value"] == Batch_Value
+                                ):
+                                    if isinstance(sous_liste["Items"], list):
+                                        sous_liste["Items"].append(
+                                            {
+                                                "Item Name": Item_Name,
+                                                "Item Value": Item_Value,
+                                            }
+                                        )
+                st.rerun()
 
-                for batch in st.session_state["all_batches"]:
-                    st.markdown(
-                        f"#### {batch['Seller']} - {batch['Batch Name']} - Value : {batch['Batch Value']} dollars"
-                    )
-                    if "Items" in batch:
-                        batch_info = pd.DataFrame(batch["Items"])
-                        batch_info = batch_info.set_index("Item Name")
-                        st.table(batch_info)
-    else:
-
-        uploaded_file = st.file_uploader("Upload a file", type=["json"])
-
-        if uploaded_file is not None:
-            st.session_state["batch_collection"] = BatchLists.from_json(
-                f"{uploaded_file.name}"
-            )
-
+for batch in st.session_state["all_batches"]:
+    st.markdown(
+        f"#### {batch['Seller']} - {batch['Batch Name']} - Value : {batch['Batch Value']} dollars"
+    )
+    if "Items" in batch:
+        batch_info = pd.DataFrame(batch["Items"])
+        batch_info = batch_info.set_index("Item Name")
+        st.table(batch_info)
 
 if st.sidebar.button("Clear batches"):
     st.session_state["all_batches"] = []

@@ -96,6 +96,8 @@ else:
     if "Demand_list" not in st.session_state:
         st.session_state["Demand_list"] = None
 
+    b1, _ = st.columns([1, 1])
+
     if (
         st.selectbox(
             "Select the type of the file you want to upload",
@@ -116,105 +118,66 @@ else:
 
         uploaded_file = st.file_uploader("Upload a file", type=["csv", "xlsx"])
 
-        b1, _ = st.columns([1, 1])
-
         if uploaded_file is not None:
             _, file_extension = os.path.splitext(uploaded_file.name)
             if file_extension == ".csv":
                 df = pd.DataFrame(pd.read_csv(uploaded_file, index_col=0))
             elif file_extension == ".xlsx":
                 df = pd.DataFrame(pd.read_excel(uploaded_file, index_col=0))
-            if b1.button("construct demand"):
-                for row in df.itertuples():
-                    Item_Name, Item_Quantity_min, Item_Quantity_max = (
-                        row
-                        if len(row) == 3
-                        else [
-                            row[0],
-                            row[1],
-                            round(float("{:.2e}".format(1.797e308)), 2),
-                        ]
-                    )
-                    if Item_Name not in st.session_state["deja_vu"]:
-                        if "Demand_list" not in st.session_state or not isinstance(
-                            st.session_state["Demand_list"], ItemListRequest
-                        ):
-                            st.session_state["Demand_list"] = ItemListRequest(
-                                [
-                                    ItemRequest(
-                                        Item_Name,
-                                        Item_Quantity_min,
-                                        Item_Quantity_max,
-                                    )
-                                ]
-                            )
-                            st.session_state["deja_vu"].append(Item_Name)
-                        else:
-                            st.session_state["Demand_list"].items.append(
-                                ItemRequest(
-                                    Item_Name,
-                                    Item_Quantity_min,
-                                    Item_Quantity_max,
-                                )
-                            )
-                            st.session_state["deja_vu"].append(Item_Name)
-                    else:
-                        st.write("Item already in the list")
+
     else:
 
         uploaded_file = st.file_uploader("Upload a file", type=["json"])
+        item_lists = pd.read_json(uploaded_file)
+        df = pd.DataFrame(
+            item_lists,
+            columns=["Item Quantity min", "Item Quantity max"],
+        )
+        df.index = [item_list["name"] for item_list in item_lists["items"]]
+        df["Item Quantity min"] = [
+            item_list["minimum_quantity"] for item_list in item_lists["items"]
+        ]
+        df["Item Quantity max"] = [
+            item_list["maximum_quantity"] for item_list in item_lists["items"]
+        ]
 
-        if st.button("construct demand"):
-            if uploaded_file is not None:
-                item_lists = pd.read_json(uploaded_file)
-                df = pd.DataFrame(
-                    item_lists,
-                    columns=["Item Quantity min", "Item Quantity max"],
+    if uploaded_file is not None:
+        if b1.button("construct demand"):
+            for row in df.itertuples():
+                Item_Name, Item_Quantity_min, Item_Quantity_max = (
+                    row
+                    if len(row) == 3
+                    else [
+                        row[0],
+                        row[1],
+                        round(float("{:.2e}".format(1.797e308)), 2),
+                    ]
                 )
-                df.index = [item_list["name"] for item_list in item_lists["items"]]
-                df["Item Quantity min"] = [
-                    item_list["minimum_quantity"] for item_list in item_lists["items"]
-                ]
-                df["Item Quantity max"] = [
-                    item_list["maximum_quantity"] for item_list in item_lists["items"]
-                ]
-                for row in df.itertuples():
-                    Item_Name, Item_Quantity_min, Item_Quantity_max = (
-                        row
-                        if len(row) == 3
-                        else [
-                            row[0],
-                            row[1],
-                            round(float("{:.2e}".format(1.797e308)), 2),
-                        ]
-                    )
-                    if Item_Name not in st.session_state["deja_vu"]:
-                        if "Demand_list" not in st.session_state or not isinstance(
-                            st.session_state["Demand_list"], ItemListRequest
-                        ):
-                            st.session_state["Demand_list"] = ItemListRequest(
-                                [
-                                    ItemRequest(
-                                        Item_Name,
-                                        Item_Quantity_min,
-                                        Item_Quantity_max,
-                                    )
-                                ]
-                            )
-                            st.session_state["deja_vu"].append(Item_Name)
-                        else:
-                            st.session_state["Demand_list"].items.append(
+                if Item_Name not in st.session_state["deja_vu"]:
+                    if "Demand_list" not in st.session_state or not isinstance(
+                        st.session_state["Demand_list"], ItemListRequest
+                    ):
+                        st.session_state["Demand_list"] = ItemListRequest(
+                            [
                                 ItemRequest(
                                     Item_Name,
                                     Item_Quantity_min,
                                     Item_Quantity_max,
                                 )
-                            )
-                            st.session_state["deja_vu"].append(Item_Name)
+                            ]
+                        )
+                        st.session_state["deja_vu"].append(Item_Name)
                     else:
-                        st.write("Item already in the list")
-            else:
-                st.write("Please upload a file")
+                        st.session_state["Demand_list"].items.append(
+                            ItemRequest(
+                                Item_Name,
+                                Item_Quantity_min,
+                                Item_Quantity_max,
+                            )
+                        )
+                        st.session_state["deja_vu"].append(Item_Name)
+                else:
+                    st.write("Item already in the list")
 
 if st.session_state["Demand_list"] is not None and "Demand_list" in st.session_state:
     for item in st.session_state["Demand_list"].items:
@@ -227,7 +190,6 @@ if st.session_state["Demand_list"] is not None and "Demand_list" in st.session_s
         )
         demand_info = demand_info.set_index("Item Name")
         st.table(demand_info)
-
 
 if st.sidebar.button("Clear demand"):
     st.session_state["deja_vu"] = []
