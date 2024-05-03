@@ -200,8 +200,10 @@ else:
         if uploaded_file is not None:
             json_df = pd.read_json(uploaded_file)
             df = create_df_from_json(json_df)
-            st.table(df)
-    st.table(df)
+            if df is not None:
+                st.table(df)
+    if df is not None:
+        st.table(df)
     if uploaded_file is not None:
         for Numbers in df.iloc[:-2].values.tolist():
             if not all(isinstance(x, (int, float)) for x in Numbers):
