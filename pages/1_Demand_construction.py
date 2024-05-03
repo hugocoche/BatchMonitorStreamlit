@@ -180,12 +180,11 @@ else:
                 item_list_pd["Item Quantity max"] = [
                     item_list["maximum_quantity"] for item_list in item_lists["items"]
                 ]
-                st.table(item_list_pd)
                 st.session_state["Demand_list"] = item_list_pd
             else:
                 st.write("Please upload a file")
 
-
+st.table(st.session_state["Demand_list"])
 if st.session_state["Demand_list"] is not None and "Demand_list" in st.session_state:
     for item in st.session_state["Demand_list"].items:
         demand_info = pd.DataFrame(
