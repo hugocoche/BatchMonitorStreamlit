@@ -5,6 +5,7 @@ import altair as alt
 import pickle
 import copy
 import os
+
 from BatchMonitor import (  # type: ignore
     BatchLists,
     BatchCollection,
