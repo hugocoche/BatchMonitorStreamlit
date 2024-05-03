@@ -101,9 +101,9 @@ else:
     if (
         st.selectbox(
             "Select the type of the file you want to upload",
-            ["csv/xlsx", "JSON"],
+            ["CSV/XSLX", "JSON"],
         )
-        == "csv/xlsx"
+        == "CSV/XSLX"
     ):
 
         st.write(
