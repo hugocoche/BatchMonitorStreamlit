@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 from BatchMonitor import BatchLists, BatchCollection, Batch, Item_in_batch  # type: ignore
-import pickle
+import json
 import os
 
 if (
@@ -351,15 +351,16 @@ if st.sidebar.button("Clear batches"):
     del st.session_state["batch_collection"]
     st.rerun()
 
-if st.sidebar.button("Export Batch list"):
-    if st.session_state["batch_collection"] is not None:
-        if len(st.session_state["batch_collection"]) > 0 and isinstance(
-            st.session_state["batch_collection"], BatchLists
-        ):
-            with open("batch_collection.pkl", "wb") as f:
-                pickle.dump(st.session_state["batch_collection"], f)
-            st.write("batch list has been exported ;) !")
-        else:
-            st.write(
-                "batch_collection is not an instance of BatchCollection or it's empty, export failed."
-            )
+if st.session_state["batch_collection"] is not None and isinstance(
+    st.session_state["batch_collection"], BatchLists
+):
+    st.session_state["export_batch_collection"] = st.session_state["batch_collection"]
+    json_export_batch_collection = json.dumps(
+        obj=st.session_state["export_batch_collection"],
+        default=lambda o: o.__dict__,
+        indent=4,
+    )
+    if st.sidebar.download_button(
+        "Download Batch list", json_export_batch_collection, "Batch_list.json", "json"
+    ):
+        pass

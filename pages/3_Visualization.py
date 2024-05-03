@@ -2,9 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import altair as alt
-import pickle
 import copy
-import os
 
 from BatchMonitor import (  # type: ignore
     BatchLists,
@@ -28,11 +26,12 @@ def original_prices(Batches: BatchLists, index) -> list:
 
 
 if st.sidebar.button("Load the the demand and the batches"):
-    if os.path.exists("batch_collection.pkl") and os.path.exists("demand.pkl"):
-        with open("batch_collection.pkl", "rb") as f:
-            st.session_state["Batches"] = pickle.load(f)
-        with open("demand.pkl", "rb") as d:
-            st.session_state["Demand"] = pickle.load(d)
+    if (
+        st.session_state["Demand_list"] is not None
+        and st.session_state["batch_collection"] is not None
+    ):
+        st.session_state["Batches"] = st.session_state["batch_collection"]
+        st.session_state["Demand"] = st.session_state["Demand_list"]
         st.write("Necessary loaded !")
     else:
         st.write("You need to export the demand and the batches first !")
