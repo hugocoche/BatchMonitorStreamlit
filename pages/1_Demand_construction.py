@@ -3,6 +3,7 @@ import pandas as pd
 import os
 from BatchMonitor import ItemListRequest, ItemRequest  # type: ignore
 import pickle
+import json
 
 if (
     st.radio(
@@ -199,3 +200,14 @@ if st.sidebar.button("Export demand"):
         st.write(
             "object is not an instance of ItemListRequest or object is empty, export failed"
         )
+
+if st.session_state["Demand"] is not None and isinstance(
+    st.session_state["Demand"], ItemListRequest
+):
+    json_export_demand = json.dumps(
+        obj=st.session_state["export_demand"], default=lambda o: o.__dict, indent=4
+    )
+    if st.sidebar.download_button(
+        "Download demand", json_export_demand, "demand.json", "json"
+    ):
+        pass
