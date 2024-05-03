@@ -1,4 +1,3 @@
-from io import BytesIO
 import streamlit as st
 import pandas as pd
 import os
@@ -115,8 +114,6 @@ else:
             "    - The following rows should contain the name of the items and their quantity minimum and maximum (maximum is optional, default value is inf) "
         )
 
-        uploaded_file: pd.DataFrame | BytesIO | None = None
-
         uploaded_file = st.file_uploader("Upload a file", type=["csv", "xlsx"])
 
         b1, _ = st.columns([1, 1])
@@ -124,12 +121,12 @@ else:
         if uploaded_file is not None:
             _, file_extension = os.path.splitext(uploaded_file.name)
             if file_extension == ".csv":
-                uploaded_file = pd.DataFrame(pd.read_excel(uploaded_file, index_col=0))
+                df = pd.DataFrame(pd.read_excel(uploaded_file, index_col=0))
             elif file_extension == ".xlsx":
-                uploaded_file = pd.DataFrame(pd.read_excel(uploaded_file, index_col=0))
+                df = pd.DataFrame(pd.read_excel(uploaded_file, index_col=0))
 
             if b1.button("construct demand"):
-                for row in uploaded_file.itertuples():
+                for row in df.itertuples():
                     Item_Name, Item_Quantity_min, Item_Quantity_max = (
                         row
                         if len(row) == 3

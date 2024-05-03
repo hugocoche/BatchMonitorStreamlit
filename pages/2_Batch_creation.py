@@ -1,4 +1,3 @@
-from io import BytesIO
 import streamlit as st
 import pandas as pd
 from BatchMonitor import BatchLists, BatchCollection, Batch, Item_in_batch  # type: ignore
@@ -193,7 +192,6 @@ else:
             "    - The last row should contain the name(s) of the seller(s) for each batch"
         )
 
-        uploaded_file: pd.DataFrame | BytesIO | None = None
         uploaded_file = st.file_uploader("Upload a file", type=["csv", "xlsx"])
 
         b1, b2, b3, _ = st.columns([1, 1, 1, 1])
@@ -201,24 +199,24 @@ else:
         if uploaded_file is not None:
             _, file_extension = os.path.splitext(uploaded_file.name)
             if file_extension == ".csv":
-                uploaded_file = pd.DataFrame(pd.read_csv(uploaded_file, index_col=0))
+                df = pd.DataFrame(pd.read_csv(uploaded_file, index_col=0))
             elif file_extension == ".xlsx":
-                uploaded_file = pd.DataFrame(pd.read_excel(uploaded_file, index_col=0))
+                df = pd.DataFrame(pd.read_excel(uploaded_file, index_col=0))
 
-            for Numbers in uploaded_file.iloc[:-2].values.tolist():
+            for Numbers in df.iloc[:-2].values.tolist():
                 if not all(isinstance(x, (int, float)) for x in Numbers):
                     st.write("Please make sure all values are numbers")
                     break
             else:
                 if b1.button("Create batches"):
                     for Batch_Name, Batch_Value, Seller_name in zip(
-                        uploaded_file.columns.tolist(),
-                        uploaded_file.iloc[-2].tolist(),
-                        uploaded_file.iloc[-1].tolist(),
+                        df.columns.tolist(),
+                        df.iloc[-2].tolist(),
+                        df.iloc[-1].tolist(),
                     ):
                         for Item_Name, Item_Value in zip(
-                            uploaded_file.index[:-2].tolist(),
-                            uploaded_file[Batch_Name].iloc[:-2].tolist(),
+                            df.index[:-2].tolist(),
+                            df[Batch_Name].iloc[:-2].tolist(),
                         ):
                             if (Seller_name, Batch_Name) not in st.session_state[
                                 "already_seen"
