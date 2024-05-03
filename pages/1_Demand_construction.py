@@ -181,7 +181,7 @@ else:
                     item_list["maximum_quantity"] for item_list in item_lists["items"]
                 ]
                 st.table(item_list_pd)
-                st.session_state["Demand"] = item_list_pd
+                st.session_state["Demand_list"] = item_list_pd
             else:
                 st.write("Please upload a file")
 
