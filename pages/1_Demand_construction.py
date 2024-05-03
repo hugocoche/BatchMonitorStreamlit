@@ -194,7 +194,9 @@ if st.session_state["Demand_list"] is not None and isinstance(
 ):
     st.session_state["export_demand_list"] = st.session_state["Demand_list"]
     json_export_demand_list = json.dumps(
-        obj=st.session_state["export_demand_list"], default=lambda o: o.__dict, indent=4
+        obj=st.session_state["export_demand_list"],
+        default=lambda o: o.__dict__,
+        indent=4,
     )
     if st.sidebar.download_button(
         "Download demand_list", json_export_demand_list, "demand_list.json", "json"
