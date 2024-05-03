@@ -121,7 +121,7 @@ else:
         if uploaded_file is not None:
             _, file_extension = os.path.splitext(uploaded_file.name)
             if file_extension == ".csv":
-                df = pd.DataFrame(pd.read_excel(uploaded_file, index_col=0))
+                df = pd.DataFrame(pd.read_csv(uploaded_file, index_col=0))
             elif file_extension == ".xlsx":
                 df = pd.DataFrame(pd.read_excel(uploaded_file, index_col=0))
 
@@ -165,10 +165,15 @@ else:
 
         uploaded_file = st.file_uploader("Upload a file", type=["json"])
 
-        if uploaded_file is not None:
-            st.session_state["Demand_list"] = ItemListRequest.from_json(
-                f"{uploaded_file.name}"
-            )
+        if st.button("construct demand"):
+            if uploaded_file is not None:
+                # st.session_state["Demand"] = ItemListRequest.from_json(
+                #     f"{uploaded_file.name}"
+                # )
+                df = pd.DataFrame(pd.read_json(uploaded_file, index_col=0))
+                st.table(df)
+            else:
+                st.write("Please upload a file")
 
 
 if st.session_state["Demand_list"] is not None and "Demand_list" in st.session_state:
