@@ -167,11 +167,21 @@ else:
 
         if st.button("construct demand"):
             if uploaded_file is not None:
-                # st.session_state["Demand"] = ItemListRequest.from_json(
-                #     f"{uploaded_file.name}"
-                # )
-                df = pd.DataFrame(pd.read_json(uploaded_file))
-                st.table(df)
+                item_lists = pd.read_json(uploaded_file)
+                item_list_pd = pd.DataFrame(
+                    item_lists, columns=["Item Quantity min", "Item Quantity max"]
+                )
+                item_list_pd.index = [
+                    item_list["name"] for item_list in item_lists["items"]
+                ]
+                item_list_pd["Item Quantity min"] = [
+                    item_list["minimum_quantity"] for item_list in item_lists["items"]
+                ]
+                item_list_pd["Item Quantity max"] = [
+                    item_list["maximum_quantity"] for item_list in item_lists["items"]
+                ]
+                st.table(item_list_pd)
+                st.session_state["Demand"] = item_list_pd
             else:
                 st.write("Please upload a file")
 
